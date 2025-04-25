@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from pandas.tseries.offsets import MonthEnd
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 # ─── 1) Fetch data from Dune ────────────────────────────────────────────────────
 api_key = os.environ['DUNE_API_KEY']
 url = "https://api.dune.com/api/v1/query/3988962/results/csv?limit=1000"
