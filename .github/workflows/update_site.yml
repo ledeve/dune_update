@@ -2,7 +2,7 @@ name: Auto-update site
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # every 15 minutes, UTC
+    - cron: '*/15 * * * *'   # every 15 minutes (UTC)
   workflow_dispatch:
 
 jobs:
@@ -13,37 +13,36 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      # 1. Checkout full history & enable push
+      # 1. Checkout full history & allow pushes
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: true
 
-      # 2. Install Python & deps
+      # 2. Setup Python
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-      - name: Install dependencies
-        run: pip install papermill requests pandas matplotlib
 
-      # 3. Execute *all* notebooks
-      - name: Execute all chart notebooks
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: pip install papermill requests pandas matplotlib python-dotenv
+
+      # 4. Execute all notebooks
+      - name: Execute notebooks
         run: |
           mkdir -p notebooks/output
           for nb in notebooks/*.ipynb; do
-            out="notebooks/output/$(basename "$nb")"
-            papermill "$nb" "$out" --cwd .
+            papermill "$nb" "notebooks/output/$(basename "$nb")" --cwd .
           done
 
-      # 4. Commit & push every updated asset
-      - name: Commit & push updated assets and content
+      # 5. Commit & push only the generated assets
+      - name: Commit & push generated charts
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/assets docs/content
-          git commit -m "chore: update assets & content" || echo "No changes to commit"
+          git commit \
+            --author="github-actions[bot] <github-actions[bot]@users.noreply.github.com>" \
+            -m "chore: automated chart update" || echo "No changes to charts"
           git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
