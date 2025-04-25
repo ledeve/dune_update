@@ -7,7 +7,7 @@ import matplotlib.dates as mdates
 from pandas.tseries.offsets import MonthEnd
 
 # ─── 1) Fetch data from Dune ────────────────────────────────────────────────────
-api_key = "pZygHqb7d2h9lu2gzOowBOMUu64VBOpJ" #os.environ['DUNE_API_KEY']
+api_key = os.environ['DUNE_API_KEY']
 url = "https://api.dune.com/api/v1/query/3988962/results/csv?limit=1000"
 headers = {"X-Dune-API-Key": api_key}
 
