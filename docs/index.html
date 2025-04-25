@@ -1,9 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><title>Auto-updated Chart</title></head>
-<body>
-  <h1>Auto-updated Chart</h1>
-  <p>Last updated: 2025-04-25 04:53:05 UTC</p>
-  <img src="chart.png" alt="Random data chart">
-</body>
-</html>
+---
+layout: default
+title: Home
+---
+
+<div class="homepage-content">
+
+  {% capture sec1 %}
+    {% include content/text_1.md %}
+  {% endcapture %}
+  {{ sec1 | markdownify }}
+
+  <img src="{{ 'chart1.png' | relative_url }}" alt="Stuff">
+
+  {% capture sec2 %}
+    {% include content/text_2.md %}
+  {% endcapture %}
+  {{ sec2 | markdownify }}
+
+  <img src="{{ 'chart2.png' | relative_url }}" alt="Stuff">
+
+
+  <!-- repeat for any other sections -->
+
+</div>

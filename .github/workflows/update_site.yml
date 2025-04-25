@@ -21,15 +21,15 @@ jobs:
       - name: Install dependencies
         run: pip install matplotlib
 
-      - name: Generate HTML & chart
+      - name: Generate charts
         run: python generate_site.py
 
-      - name: Commit & push changes
+      - name: Commit & push images
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/index.html docs/chart.png
-          git commit -m "chore: automated update" || echo "No changes"
+          git add docs/assets/charts/*.png
+          git commit -m "chore: update charts" || echo "No chart changes"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

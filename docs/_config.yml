@@ -1,0 +1,3 @@
+# docs/_config.yml
+theme: jekyll-theme-primer
+permalink: pretty       # so /foo.md → /foo/
