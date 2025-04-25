@@ -1,8 +1,8 @@
 name: Auto-update site
 
 on:
-  schedule:   # every 15 min
-    - cron: '*/15 * * * *'
+  schedule:
+    - cron: '*/15 * * * *'   # every 15 minutes, UTC
   workflow_dispatch:
 
 jobs:
@@ -13,27 +13,37 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
+      # 1. Checkout full history & enable push
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: true
 
+      # 2. Install Python & deps
       - name: Setup Python
         uses: actions/setup-python@v4
-        with: { python-version: '3.x' }
-
-      - name: Install notebook deps
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
         run: pip install papermill requests pandas matplotlib
 
-      - name: Execute chart notebook
+      # 3. Execute *all* notebooks
+      - name: Execute all chart notebooks
         run: |
-          papermill notebooks/update_chart.ipynb notebooks/output.ipynb --cwd .
+          mkdir -p notebooks/output
+          for nb in notebooks/*.ipynb; do
+            out="notebooks/output/$(basename "$nb")"
+            papermill "$nb" "$out" --cwd .
+          done
 
-      - name: Commit & push images
+      # 4. Commit & push every updated asset
+      - name: Commit & push updated assets and content
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/assets/e7/octant_tx_month.png
-          git commit -m "chore: update octant_tx_month chart" || echo "No changes"
+          git add docs/assets docs/content
+          git commit -m "chore: update assets & content" || echo "No changes to commit"
           git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
