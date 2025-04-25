@@ -50,7 +50,7 @@ jobs:
       # 5. Commit & push only the generated assets
       - name: Commit & push generated charts
         run: |
-          git add docs/assets docs/content
+          git add docs/assets
           git commit \
             --author="github-actions[bot] <github-actions[bot]@users.noreply.github.com>" \
             -m "chore: automated chart update" || echo "No changes to charts"
