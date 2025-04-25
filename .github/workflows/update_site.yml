@@ -1,45 +1,39 @@
 name: Auto-update site
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'   # every 15 minutes (UTC)
+  schedule:   # every 15 min
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      # 1. Checkout with full history & push rights
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: true
 
-      # 2. Set up Python
       - name: Setup Python
         uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+        with: { python-version: '3.x' }
 
-      # 3. Install dependencies
-      - name: Install dependencies
-        run: pip install requests pandas matplotlib
+      - name: Install notebook deps
+        run: pip install papermill requests pandas matplotlib
 
-      # 4. Generate chart (injecting DUNE_API_KEY)
-      - name: Generate chart
-        env:
-          DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
-        run: python generate_site.py
+      - name: Execute chart notebook
+        run: |
+          papermill notebooks/update_chart.ipynb notebooks/output.ipynb --cwd .
 
-      # 5. Commit & push only the updated PNG
       - name: Commit & push images
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/assets/e7/octant_tx_month.png
-          git commit -m "chore: update octant_tx_month chart" || echo "No changes to chart"
+          git commit -m "chore: update octant_tx_month chart" || echo "No changes"
           git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
