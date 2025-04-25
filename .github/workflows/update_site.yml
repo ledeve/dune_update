@@ -20,22 +20,31 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      # 2. Setup Python
+      # 2. Set up Python
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # 3. Install dependencies
+      # 3. Install all dependencies including the kernel
       - name: Install dependencies
-        run: pip install papermill requests pandas matplotlib python-dotenv
+        run: |
+          pip install papermill requests pandas matplotlib python-dotenv ipykernel
 
-      # 4. Execute all notebooks
+      # 4. Register a python3 kernel for Papermill
+      - name: Register Jupyter kernel
+        run: |
+          python -m ipykernel install --name python3 --user
+
+      # 5. Execute all chart notebooks
       - name: Execute notebooks
         run: |
           mkdir -p notebooks/output
           for nb in notebooks/*.ipynb; do
-            papermill "$nb" "notebooks/output/$(basename "$nb")" --cwd .
+            papermill \
+              --kernel python3 \
+              "$nb" "notebooks/output/$(basename "$nb")" \
+              --cwd .
           done
 
       # 5. Commit & push only the generated assets
