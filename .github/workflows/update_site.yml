@@ -6,24 +6,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Check out the repo and make the GITHUB_TOKEN available for pushes
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
+      # 2. Set up Python
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      # 3. Install matplotlib
       - name: Install dependencies
         run: pip install matplotlib
 
+      # 4. Run your chart-generation script
       - name: Generate charts
         run: python generate_site.py
 
+      # 5. Commit & push any updated chart images
       - name: Commit & push images
         run: |
           git config user.name "github-actions[bot]"
@@ -31,5 +38,3 @@ jobs:
           git add docs/assets/charts/*.png
           git commit -m "chore: update charts" || echo "No chart changes"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
