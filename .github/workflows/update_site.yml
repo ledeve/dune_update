@@ -10,31 +10,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out the repo and make the GITHUB_TOKEN available for pushes
+      # 1. Check out the repo with full history so we can push non-fast-forward
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          persist-credentials: true
+          fetch-depth: 0            # grab the entire history
+          persist-credentials: true # so git push uses GITHUB_TOKEN
 
-      # 2. Set up Python
+      # 2. (Optional) make sure we're on main and up to date
+      - name: Ensure up-to-date
+        run: |
+          git checkout main
+          git pull origin main
+
+      # 3. Set up Python
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # 3. Install matplotlib
+      # 4. Install matplotlib
       - name: Install dependencies
         run: pip install matplotlib
 
-      # 4. Run your chart-generation script
+      # 5. Run your chart-generation script
       - name: Generate charts
         run: python generate_site.py
 
-      # 5. Commit & push any updated chart images
+      # 6. Commit & push any updated chart images
       - name: Commit & push images
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/assets/charts/*.png
           git commit -m "chore: update charts" || echo "No chart changes"
-          git push
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
